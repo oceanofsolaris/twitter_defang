@@ -24,12 +24,16 @@ test('feeds and discovery are blocked', () => {
   }
 });
 
-test('logged out, x.com/ is the sign-in page and must open', () => {
-  assert.ok(allowed('/', LOGGED_OUT));
-  assert.ok(allowed('/home', LOGGED_OUT));
-  // ...but being logged out does not open anything else
-  assert.ok(!allowed('/explore', LOGGED_OUT));
-  assert.ok(!allowed('/jack', LOGGED_OUT));
+test('logged out, nothing is blocked so any login flow can complete', () => {
+  // x.com/ is the sign-in page; Google/Apple sign-in from a post page
+  // finishes on paths no list here can anticipate.
+  for (const p of ['/', '/home', '/explore', '/i/some/future/sso_step', '/jack']) {
+    assert.ok(allowed(p, LOGGED_OUT), p);
+  }
+});
+
+test('logged out, a post is still a post (keeps Discover-more stripping)', () => {
+  assert.equal(classify('/jack/status/20', '', DEFAULTS, LOGGED_OUT).kind, 'status');
 });
 
 test('no ctx means logged in: unknown login state must never unblock', () => {

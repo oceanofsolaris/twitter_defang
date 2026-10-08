@@ -90,11 +90,14 @@
       return no('engagement', 'post analytics');
     }
 
-    if (p === '/' || p === '/home') {
-      // Logged out, x.com/ is the sign-in page, not a feed, and X's login flow
-      // passes through it. Blocking it makes logging in impossible.
-      return loggedIn ? no('feed', 'the main feed') : ok('auth', 'sign-in page');
-    }
+    // Logged out there is no feed to protect, and X's login flows (the Google
+    // and Apple sign-in in particular) pass through pages that are not on any
+    // list here. Blocking one of those aborts the login half-way, so while
+    // logged out nothing is blocked. Posts are matched above, so they keep
+    // their "Discover more" stripping either way.
+    if (!loggedIn) return ok('loggedout', 'logged out');
+
+    if (p === '/' || p === '/home') return no('feed', 'the main feed');
     if (/^\/explore/.test(p) || /^\/i\/trending/.test(p) || /^\/trends/.test(p)) {
       return no('discovery', 'Explore / Trending');
     }

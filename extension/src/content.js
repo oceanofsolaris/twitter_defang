@@ -162,10 +162,10 @@
   }
 
   function scan() {
-    // x.com/ was let through as the sign-in page; if it turns out to be a
-    // logged-in feed after all, block it now.
-    if (root.getAttribute('data-tdf-page') === 'auth' &&
-        /^\/(home)?\/?$/.test(location.pathname) && isLoggedIn()) {
+    // This page was let through because no session was detected. Once one
+    // shows up - login just finished, or the cookie check missed it and X's
+    // logged-in navigation has now rendered - re-run the routing decision.
+    if (root.getAttribute('data-tdf-page') === 'loggedout' && isLoggedIn()) {
       route(location.pathname, location.search);
       return;
     }

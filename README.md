@@ -28,7 +28,8 @@ else does not.**
 - `/i/status/{id}`, `/i/web/status/{id}` — the canonical link forms
 - `/status/{id}/photo/1`, `/video/1` — media views
 - `/i/flow/*`, `/login`, `/settings/*` — so you can never lock yourself out
-- `x.com/` itself **while logged out**, because then it is the sign-in page
+- **everything while logged out**: there is no feed to protect then, and X's
+  sign-in flows (Google, Apple) pass through pages no list could anticipate
 - `/i/oauth2/*`, `/oauth/*` — "Sign in with X" on other websites
 - `/i/chat`, `/messages` (DMs), `/compose/post` — on by default; both are toggles
 
