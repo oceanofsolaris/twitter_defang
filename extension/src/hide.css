@@ -19,13 +19,12 @@ html[data-tdf="pending"] [data-testid="sidebarColumn"] {
 html[data-tdf-sidebar="hide"] [data-testid="sidebarColumn"] {
   display: none !important;
 }
-/* With the sidebar gone, let the post column use the freed width. */
+/* Keep X's native 600px post width - widening it turns posts into single
+   long lines - and center the column in the space the sidebar left behind.
+   On narrow screens the column already fills the width, so this is a no-op. */
 html[data-tdf-sidebar="hide"] [data-testid="primaryColumn"] {
-  width: 100% !important;
-  max-width: 800px !important;
-}
-html[data-tdf-sidebar="hide"] [data-testid="primaryColumn"] > div {
-  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
 /* ---- 3. discovery modules ---------------------------------------------- */
