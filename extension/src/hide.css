@@ -1,0 +1,82 @@
+/* Every rule is gated on an attribute that content.js puts on <html>, so the
+   settings can turn things on and off without re-injecting a stylesheet.
+
+   This file is listed in the manifest, so it lands before X's first paint.
+   That matters: the point is that the feed is never briefly visible. */
+
+/* ---- 1. pre-decision blackout ------------------------------------------ */
+/* Set at document_start, cleared the moment the route has been classified.
+   Only the content area is hidden, never <body>, so a failure mid-decision
+   leaves a usable page rather than a white screen. The failsafe in content.js
+   clears this after 2s no matter what. */
+html[data-tdf="pending"] [data-testid="primaryColumn"],
+html[data-tdf="pending"] [data-testid="sidebarColumn"] {
+  visibility: hidden !important;
+}
+
+/* ---- 2. right-hand column ---------------------------------------------- */
+/* Trends, "Who to follow", Premium upsell, live audio - all of it. */
+html[data-tdf-sidebar="hide"] [data-testid="sidebarColumn"] {
+  display: none !important;
+}
+/* With the sidebar gone, let the post column use the freed width. */
+html[data-tdf-sidebar="hide"] [data-testid="primaryColumn"] {
+  width: 100% !important;
+  max-width: 800px !important;
+}
+html[data-tdf-sidebar="hide"] [data-testid="primaryColumn"] > div {
+  max-width: 100% !important;
+}
+
+/* ---- 3. discovery modules ---------------------------------------------- */
+html[data-tdf-wtf="hide"] [data-testid="UserCell"] {
+  display: none !important;
+}
+/* Cells that content.js has identified as a discovery module. */
+[data-tdf-strip="1"] {
+  display: none !important;
+}
+
+/* ---- 4. promoted posts -------------------------------------------------- */
+html[data-tdf-ads="hide"] [data-testid="placementTracking"] {
+  display: none !important;
+}
+
+/* ---- 5. left navigation ------------------------------------------------- */
+/* Leave Profile, Settings and the post button alone; remove the ways back
+   into a feed. */
+html[data-tdf-nav="hide"] a[data-testid="AppTabBar_Home_Link"],
+html[data-tdf-nav="hide"] a[data-testid="AppTabBar_Explore_Link"],
+html[data-tdf-nav="hide"] a[data-testid="AppTabBar_Notifications_Link"],
+html[data-tdf-nav="hide"] a[href="/explore"],
+html[data-tdf-nav="hide"] a[href="/home"],
+html[data-tdf-nav="hide"] a[href="/i/premium_sign_up"],
+html[data-tdf-nav="hide"] a[href="/i/verified-orgs-signup"],
+html[data-tdf-nav="hide"] a[href^="/i/communities"],
+html[data-tdf-nav="hide"] a[href^="/i/grok"],
+html[data-tdf-nav="hide"] a[href^="/i/connect_people"],
+html[data-tdf-nav="hide"] a[href^="/i/chat"],
+html[data-tdf-nav="hide"] a[href^="/i/history"],
+html[data-tdf-nav="hide"] nav a[href="/compose/post"] {
+  display: none !important;
+}
+/* The X logo also points at /home, so the rule above takes it with them.
+   That is intentional: every route back into a feed disappears at once. */
+
+/* ---- 6. engagement counters -------------------------------------------- */
+html[data-tdf-counts="hide"] [data-testid="like"] span,
+html[data-tdf-counts="hide"] [data-testid="unlike"] span,
+html[data-tdf-counts="hide"] [data-testid="retweet"] span,
+html[data-tdf-counts="hide"] [data-testid="unretweet"] span,
+html[data-tdf-counts="hide"] [data-testid="reply"] span,
+html[data-tdf-counts="hide"] a[href$="/analytics"] {
+  display: none !important;
+}
+
+/* ---- 7. misc nags ------------------------------------------------------- */
+/* Bottom-of-screen "Don't miss what's happening" login bar and cookie tray
+   only show up logged out, but they cover the post, so drop them. */
+html[data-tdf-sidebar="hide"] [data-testid="BottomBar"],
+html[data-tdf-sidebar="hide"] [data-testid="sheetDialog"] {
+  display: none !important;
+}
