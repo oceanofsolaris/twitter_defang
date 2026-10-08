@@ -29,7 +29,10 @@ html[data-tdf-sidebar="hide"] [data-testid="primaryColumn"] > div {
 }
 
 /* ---- 3. discovery modules ---------------------------------------------- */
-html[data-tdf-wtf="hide"] [data-testid="UserCell"] {
+/* Post pages only. The same element renders Settings -> Blocked and Muted
+   accounts and the DM people picker; hiding it everywhere made it impossible
+   to unblock anyone. */
+html[data-tdf-wtf="hide"][data-tdf-page="status"] [data-testid="UserCell"] {
   display: none !important;
 }
 /* Cells that content.js has identified as a discovery module. */
@@ -55,7 +58,6 @@ html[data-tdf-nav="hide"] a[href="/i/verified-orgs-signup"],
 html[data-tdf-nav="hide"] a[href^="/i/communities"],
 html[data-tdf-nav="hide"] a[href^="/i/grok"],
 html[data-tdf-nav="hide"] a[href^="/i/connect_people"],
-html[data-tdf-nav="hide"] a[href^="/i/chat"],
 html[data-tdf-nav="hide"] a[href^="/i/history"],
 html[data-tdf-nav="hide"] nav a[href="/compose/post"] {
   display: none !important;

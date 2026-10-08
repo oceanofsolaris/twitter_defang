@@ -53,8 +53,27 @@
   /* ------------------------------------------------------------------ *
    * 3. Routing.
    * ------------------------------------------------------------------ */
+
+  // Only matters for x.com/ and /home, which are the sign-in page when logged
+  // out. `twid` is X's script-readable user-id cookie (the session token itself
+  // is HttpOnly); only its presence is checked, the value is never read. The
+  // DOM markers are a second signal so that a missing or renamed cookie cannot
+  // switch the blocker off for a logged-in user - at worst it delays the block
+  // until X's own navigation has rendered.
+  var LOGGED_IN_MARKERS =
+    '[data-testid="SideNav_AccountSwitcher_Button"], [data-testid="AppTabBar_Profile_Link"]';
+
+  function isLoggedIn() {
+    if (/(?:^|;\s*)twid=/.test(document.cookie)) return true;
+    return !!document.querySelector(LOGGED_IN_MARKERS);
+  }
+
+  function classify(pathname, search) {
+    return TDF.classify(pathname, search, settings, { loggedIn: isLoggedIn() });
+  }
+
   function route(pathname, search) {
-    var verdict = TDF.classify(pathname, search, settings);
+    var verdict = classify(pathname, search);
     if (verdict.allow) {
       root.setAttribute('data-tdf-page', verdict.kind);
       return true;
@@ -92,7 +111,7 @@
     if (!href || href[0] !== '/') return; // external or hash link
     var u;
     try { u = new URL(href, location.origin); } catch (_) { return; }
-    if (TDF.classify(u.pathname, u.search, settings).allow) return;
+    if (classify(u.pathname, u.search).allow) return;
     e.preventDefault();
     e.stopPropagation();
     route(u.pathname, u.search);
@@ -143,6 +162,13 @@
   }
 
   function scan() {
+    // x.com/ was let through as the sign-in page; if it turns out to be a
+    // logged-in feed after all, block it now.
+    if (root.getAttribute('data-tdf-page') === 'auth' &&
+        /^\/(home)?\/?$/.test(location.pathname) && isLoggedIn()) {
+      route(location.pathname, location.search);
+      return;
+    }
     if (root.getAttribute('data-tdf-page') !== 'status') return;
 
     var timeline = document.querySelector(

@@ -46,8 +46,12 @@
     /^\/account\//,
     /^\/settings(\/|$)/,
     /^\/i\/keyboard_shortcuts\/?$/,
-    /^\/tos\/?$/,
-    /^\/privacy\/?$/
+    // "Sign in with X" on third-party sites. Blocking these silently breaks
+    // logins elsewhere, with nothing pointing back at this extension.
+    /^\/i\/oauth2\//,
+    /^\/oauth\//,
+    // Legal pages, bare or localized (/tos, /en/tos, /pt-br/privacy).
+    /^\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?(?:tos|privacy)\/?$/
   ];
 
   // Reserved first path segments, so /explore is never mistaken for a profile.
@@ -60,10 +64,12 @@
 
   /**
    * Decide what to do with a path.
+   * ctx.loggedIn: false only when the caller is sure there is no session.
    * @returns {{allow: boolean, kind: string, reason: string}}
    */
-  function classify(pathname, search, s) {
+  function classify(pathname, search, s, ctx) {
     s = s || DEFAULTS;
+    var loggedIn = !(ctx && ctx.loggedIn === false);
     var p = (pathname || '/').replace(/\/+$/, '') || '/';
 
     for (var i = 0; i < ALWAYS_OK.length; i++) {
@@ -84,7 +90,11 @@
       return no('engagement', 'post analytics');
     }
 
-    if (p === '/' || p === '/home') return no('feed', 'the main feed');
+    if (p === '/' || p === '/home') {
+      // Logged out, x.com/ is the sign-in page, not a feed, and X's login flow
+      // passes through it. Blocking it makes logging in impossible.
+      return loggedIn ? no('feed', 'the main feed') : ok('auth', 'sign-in page');
+    }
     if (/^\/explore/.test(p) || /^\/i\/trending/.test(p) || /^\/trends/.test(p)) {
       return no('discovery', 'Explore / Trending');
     }
@@ -96,7 +106,8 @@
         ? ok('notifications', 'notifications')
         : no('engagement', 'notifications');
     }
-    if (/^\/messages/.test(p)) {
+    // DMs moved from /messages to /i/chat; both are the same setting.
+    if (/^\/messages/.test(p) || /^\/i\/chat(\/|$)/.test(p)) {
       return s.allowMessages ? ok('messages', 'messages') : no('feed', 'messages');
     }
     if (/^\/i\/bookmarks/.test(p)) {

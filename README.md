@@ -28,7 +28,9 @@ else does not.**
 - `/i/status/{id}`, `/i/web/status/{id}` — the canonical link forms
 - `/status/{id}/photo/1`, `/video/1` — media views
 - `/i/flow/*`, `/login`, `/settings/*` — so you can never lock yourself out
-- `/messages`, `/compose/post` — on by default; both are toggles
+- `x.com/` itself **while logged out**, because then it is the sign-in page
+- `/i/oauth2/*`, `/oauth/*` — "Sign in with X" on other websites
+- `/i/chat`, `/messages` (DMs), `/compose/post` — on by default; both are toggles
 
 **Strips from the post page itself:**
 
@@ -164,10 +166,20 @@ hypothetical.
 is gated on a `data-tdf-*` attribute that the content script sets, which is how
 settings toggle CSS without re-injecting a stylesheet.
 
+## Tests
+
+```sh
+node --test
+```
+
+Covers the route policy, including the cases that broke in 1.0.0: logging in,
+"Sign in with X", DMs at `/i/chat`, and localized legal pages.
+
 ## Layout
 
 ```
 build.mjs             emits the Chrome and Firefox packages
+test/rules.test.mjs   route policy regression tests
 extension/
   manifest.json       MV3, Chrome + Safari (Firefox keys added by build.mjs)
   src/rules.js        route policy + settings schema (shared)
